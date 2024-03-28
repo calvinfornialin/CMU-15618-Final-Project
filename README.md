@@ -1,5 +1,5 @@
 # CMU-15618-Final-Project
-## Design and Implementation Of A Cache Hierarchy-Aware Task Scheduling On Multicore Architectures
+## Design and Implementation of a Cache Hierarchy-Aware Task Scheduling on Multicore Architectures
 ## URL
 https://github.com/calvinfornialin/15618-Final-Project
 
