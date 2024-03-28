@@ -17,24 +17,36 @@ Dependencies: Some tasks might depend on the completion of others, which require
 System Constraints: Mapping tasks effectively to a multicore architecture, considering the data locality and workload balance, is already challenging; considering cache hierarchy and core interconnect bandwidth is even more difficult.
 
 ## Resources
-Machine used: We plan to develop the scheduling approach on local machines and then run tests and benchmarks on the GHC and PSC machines.
-Starting framework: CADSS: We'll start implementing the computing system from scratch, building upon the modules exposed by CADSS.
-Reference paper: Nader Khammassi, Jean-Christophe Le Lann, "Design and Implementation of a Cache Hierarchy-Aware Task Scheduling for Parallel Loops on Multicore Architectures".
+### Machine used
+We plan to develop the scheduling approach on local machines and then run tests and benchmarks on the GHC and PSC machines.
+### Starting framework
+CADSS: We'll start implementing the computing system from scratch, building upon the modules exposed by CADSS.
+### Reference paper
+Nader Khammassi, Jean-Christophe Le Lann, "Design and Implementation of a Cache Hierarchy-Aware Task Scheduling for Parallel Loops on Multicore Architectures".
 
 ## Goals and Deliverables
-Plan to Achieve: Implement a cache hierarchy-aware task scheduler that considers cache hierarchy for task execution. Demonstrate improved cache hit rates and reduced execution times for selected compute-intensive applications compared to several standard schedulers.
-Hope to Achieve: If ahead of schedule, we’d like to explore factors beside cache hierarchy that might also affect task scheduling performance metrics and include that in our scheduler.
+### Plan to Achieve
+- Implement a cache hierarchy-aware task scheduler that considers cache hierarchy for task execution. 
+- Demonstrate improved cache hit rates and reduced execution times for selected compute-intensive applications compared to several standard schedulers like static, dynamic scheduler, and task-stealing and achieve at least 10% of improvement.
+- Gain performance improvement on several simple and common cases.
+### Hope to Achieve
+- If ahead of schedule, we’d like to explore factors beside cache hierarchy that might also affect task scheduling performance metrics and include that in our scheduler.
+- If ahead of schedule, we’d like to explore how to improve the task scheduling performance metrics of our scheduler on more test cases and situations.
+- If ahead of schedule, we’d like to extend the scheduler to dynamically adapt task distribution on-the-fly based on real-time cache usage and observed behavior.
 
 ### Demo
 An interactive demonstration showcasing the performance improvements in task execution times and cache utilization compared to non-optimized scheduling. Speedup graphs and cache hit/miss statistics will be presented.
 
 ### Analysis Goals
-Understand how task granularity influences task performance metrics.
-Understand how different cache hierarchy levels influence task scheduling performance metrics and to identify the optimal task granularity for maximizing cache utilization.
-Understand how CPU core number influences task scheduling performance metrics and to identify the optimal task granularity for maximizing cache utilization.
+There are several variables that we want to know how they can impact the performance of task scheduling:
+- Understand how task granularity influences task performance metrics.
+- Understand how different cache hierarchy levels influence task scheduling performance metrics and to identify the optimal task granularity for maximizing cache utilization.
+- Understand how CPU core number influences task scheduling performance metrics and to identify the optimal task granularity for maximizing cache utilization.
 
 ## Platform Choice
-We will be doing most of our development and testing locally and on the GHC machines. For the scalability study, we will be using PSC machine.
+- We will be doing most of our development and testing locally and on the GHC machines. As for the scalability study, we will be using PSC machine. Using these systems will ensure that our proposed solutions can adapt to various different cache hierarchies and scale to different numbers of processors.
+- We will be using CADSS as out starting code base to simulate each component in the computer system.
+- We will use C++ as our developing language.
 
 ## Schedule
 Week 1: Study CADSS’s basic modules code and how the simulation platform functions.
