@@ -1,12 +1,12 @@
 # CMU-15618-Final-Project
-## Topic: Design and Implementation Of A Cache Hierarchy-Aware Task Scheduling On Multicore Architectures ##
+## Design and Implementation Of A Cache Hierarchy-Aware Task Scheduling On Multicore Architectures ##
 URL: https://github.com/calvinfornialin/15618-Final-Project
 
-Summary
+## Summary ##
 
 This project aims to design and implement a cache hierarchy-aware task scheduling system for multicore architectures. The goal is to optimize task execution on parallel systems by leveraging knowledge of the cache hierarchy to reduce cache misses and improve cache utilization and overall system performance.
 
-Background
+## Background
 
 Many modern applications, particularly those in scientific computing, data analytics, and machine learning, are compute-intensive and can benefit significantly from parallel execution. As learned in lectures, optimal performance on multicore systems requires careful consideration of how tasks are scheduled among multiple cores or processors. Several crucial factors that we should consider are data locality, workload balance, and synchronization/communication time. However, the static or dynamic scheduling approaches introduced in lectures have neglected the cache hierarchy factor. So, in this project, we will propose a novel scheduling approach that takes not only data locality and workload balance but also cache hierarchy into account, and focus on a compute-intensive component that involves frequent data accesses, such as matrix multiplication, where parallelism can be exploited through task partitioning and scheduling based on cache topology and behavior.
 
