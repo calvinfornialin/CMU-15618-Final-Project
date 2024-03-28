@@ -54,8 +54,10 @@ There are several variables that we want to know how they can impact the perform
 - We will use C++ as our developing language.
 
 ## Schedule
-Week 1: Study CADSS’s basic modules code and how the simulation platform functions.
-Week 2: Design and revise the algorithm of cache hierarchy-aware scheduler.
-Week 3: Implementation of the scheduler.
-Week 4: Perform analysis and gather data among several schedulers.
-Week 5: Work on report and extending scheduler to be dynamically adjustable.
+| Week Number | Checkpoint | Status |
+|----------|----------|----------|
+| 1 | Study CADSS’s basic modules code and how the simulation platform functions. | N/A |
+| 2 | Design and revise the algorithm of cache hierarchy-aware scheduler. | N/A |
+| 3 | Implementation of the scheduler. | N/A |
+| 4 | Perform analysis and gather data among several schedulers. | N/A |
+| 5 | Work on report and extending scheduler to be dynamically adjustable. | N/A |
