@@ -1,7 +1,7 @@
 # CMU-15618-Final-Project
 ## Design and Implementation of a Cache Hierarchy-Aware Task Scheduling on Multicore Architectures
 ## URL
-https://github.com/calvinfornialin/CMU-15618-Final-Project.git
+[Final project proposal](<https://github.com/calvinfornialin/CMU-15618-Final-Project.git>)
 
 ## Summary
 
@@ -47,12 +47,24 @@ An interactive demonstration showcasing the performance improvements in task exe
 - There are several variables that we want to know how they can impact the performance of task scheduling:
     - Understand how task granularity influence task performance metrics.
     - Understand how including cache topology factor can influence task scheduling performance metrics.
+    - Understand how including cache topology factor can influence the scalability of scheduling with increasing number of threads or cores.
     - Understand how CPU core number influences task scheduling performance metrics and to identify the optimal task granularity for maximizing cache utilization.
 
 ## Platform Choice
 - We will be doing most of our development and testing locally and on the GHC machines. As for the scalability study, we will be using PSC machine. Using these systems will ensure that our proposed solutions can adapt to various different cache hierarchies and scale to different numbers of processors.
 - We will be using OpenMP open scheduler source code as our starting code to further implement cache-aware scheduler.
 - We will use C++ as our developing language.
+
+## Most Concerned Issues
+### **Complexity and Interdependencies:** 
+Scheduling in a OpenMP runtime involves numerous components and is tightly integrated with other runtime features like synchronization, load balancing, and communication. Modifying the scheduler might have several side effects on these other components. Understanding and managing these interdependencies is crucial to ensure that the modifications won’t introduce unexpected behaviors or degrade performance in other parts of the system.
+### **Performance Effect:** 
+Changes in scheduling strategies might lead to performance regressions in other metrics: 
+- **Load Balancing**: Ensuring that the workload is evenly distributed across threads to avoid idle resources.
+- **Overhead**: Introducing a new scheduler that is cache-hierarchy aware might increase the runtime overhead due to more complex decision-making and some additional steps for cache metrics collecting.
+- **Scalability**: Ensuring the modified scheduler can scale effectively with increasing numbers of threads or cores.
+### **Portability and Hardware Specific Optimizations:** 
+Since we are taking the cache-hierarchy factor into account, which means the scheduler will reach more lower-level in hardware abstractions. We need to make sure that the scheduler is portable across different underlying machine, accommodating different number of CPU cores and various cache topologies, rather than being overfitted and optimized for a specific machine.
 
 ## Schedule
 | Week Number | Checkpoint | Status |
@@ -62,3 +74,12 @@ An interactive demonstration showcasing the performance improvements in task exe
 | 3 | Implementation of the scheduler. | N/A |
 | 4 | Perform analysis and gather data among several schedulers. | N/A |
 | 5 | Work on report and extending scheduler to be dynamically adjustable. | N/A |
+
+## Updated Schedule for Project Milestone
+| Week Number | Checkpoint | Person in charge | Status |
+|----------|----------|----------|----------|
+| 0 - 0.5 | Build the initial version of the proposed scheduler. | Yen-Shuo | N/A |
+| 0.5 -1 | Debug and customize the scheduler to make it easier to conduct experiments related to sensitivity analysis. | Calvin | N/A |
+| 1 - 1.5 | Use the scheduler and test its performance on one of the tasks used for performance comparison between different types of schedulers. | Yen-Shuo | N/A |
+| 1.5 -2 | Measure the performance gains of the proposed schedulers against OpenMP implemented scheduler types using various tasks. Make adjustments if needed. | Calvin | N/A |
+| 2 - 2.5 | Buffer time to conduct any extra experiments needed. If everything goes well, look into the tasks listed in “nice to haves.” | Calvin, Yen-Shuo | N/A |
