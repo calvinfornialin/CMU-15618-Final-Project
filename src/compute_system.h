@@ -46,7 +46,6 @@ class Cache {
 };
 
 
-// Used to hold details of a point
 class ComputeSystem {
 
     private:
