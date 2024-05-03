@@ -20,6 +20,8 @@ class Cache {
         // number of cores sharing this cache
         int numSharingCore;
 
+        bool privateCache;
+
         // core ID that share this cache
         vector<int> sharingCoreID;
 
@@ -28,6 +30,7 @@ class Cache {
         Cache(int l, int s, int b, const vector<int>& sharingIDs) 
             : level(l), size(s), blockSize(b), sharingCoreID(sharingIDs) {
             numSharingCore = sharingCoreID.size();
+            privateCache = (sharingCoreID.size() == 1)? true : false;
         }
 
         // display cache info
@@ -37,11 +40,20 @@ class Cache {
             cout << "Cache size: " << size << " bytes" << endl;
             cout << "Block size: " << blockSize << " bytes" << endl;
             cout << "Number of cores sharing: " << numSharingCore << endl;
-            cout << "Core ID(s) sharing this cache: ";
-            for (int id : sharingCoreID) {
-                cout << id << " ";
+            if (privateCache) {
+                cout << "It's a private cache to: ";
+                for (int id : sharingCoreID) {
+                    cout << id << " ";
+                }
+                cout << endl;
             }
-            cout << endl;
+            else {
+                cout << "It's shared by Core ID(s): ";
+                for (int id : sharingCoreID) {
+                    cout << id << " ";
+                }
+                cout << endl;
+            }
         }
 };
 
