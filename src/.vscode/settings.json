@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "asm2hex": "python",
+        "vector": "cpp"
+    }
+}
