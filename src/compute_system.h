@@ -1,5 +1,8 @@
 #include <iostream>
 #include <vector>
+#include <set>
+#include <map>
+#include <algorithm>
 
 using namespace std;
  
@@ -32,6 +35,24 @@ class Cache {
             numSharingCore = sharingCoreID.size();
             privateCache = (sharingCoreID.size() == 1)? true : false;
         }
+
+
+        // return the level of the cache
+        int getCacheLevel() const{
+            return level;
+        }
+
+
+        // return the privacy of the cache
+        bool getCachePrivacy() const{
+            return privateCache;
+        }
+
+
+        vector<int> getsharingCoreID() const {
+            return sharingCoreID;
+        }
+
 
         // display cache info
         void display() {
@@ -76,11 +97,58 @@ class ComputeSystem {
         // constructor
         ComputeSystem(int l, int c) : cacheLevels(l), coreCount(c) {}
 
+
         // add a cache to the system
         void addCache(int level, int size, int blockSize, const vector<int>& sharingIDs) {
             Cache newCache(level, size, blockSize, sharingIDs);
             cacheHierarchy.push_back(newCache);
         }
+
+
+        // return number of shared caches at all levels
+        /*int numSharedCaches(const vector<Cache>& cacheHierarchy) {
+            int numSharedCaches = 0;
+            for (auto& cache : cacheHierarchy) {
+                // case it's a shared cache
+                if (!cache.getCachePrivacy()) {
+                    // case it's L1 cache
+                    if (cache.getCacheLevel() == 1) {
+                        numSharedCaches++;
+                    } 
+                    else {
+                        // check if there's other higher level cache
+                        // that's also shared and are shared by the same
+                        // set of cores
+
+                    }
+                }
+            }
+        }*/
+        int numSharedCaches(const vector<Cache>& cacheHierarchy) {
+            map<set<int>, int> sharedCacheCount;  // Maps sets of core IDs to the count of shared caches.
+
+            for (const auto& cache : cacheHierarchy) {
+                set<int> coreSet(cache.getsharingCoreID().begin(), cache.getsharingCoreID().end());
+                
+                // only consider shared caches
+                if (coreSet.size() > 1) {  
+                    // increments the count for each unique core set
+                    sharedCacheCount[coreSet]++;
+                }
+            }
+
+            // each unique core set that has more than one cache sharing it counts as one
+            int uniqueSharedCaches = 0;
+            for (const auto& entry : sharedCacheCount) {
+                // only count if there's at least one shared cache
+                if (entry.second > 0) {  
+                    uniqueSharedCaches++;
+                }
+            }
+
+            return uniqueSharedCaches;
+        }
+
 
         // Display compute system info
         void display() {
@@ -94,7 +162,6 @@ class ComputeSystem {
             }
             cout << endl;
         }
-        
 };
  
 

@@ -3,7 +3,9 @@
 #include "compute_system.h"
 
 int main() {
-    /*
+
+    // initialize the underlying hardware system including 
+    // cores number and cache topology
     ComputeSystem system(3, 8);
 
     system.addCache(1, 32 * 1024, 64, {0});     // core 0's private L1 cache 
@@ -19,8 +21,8 @@ int main() {
     system.addCache(2, 256 * 1024, 64, {4, 5}); // L2 cache shared by cores 4 and 5
     system.addCache(2, 256 * 1024, 64, {6, 7}); // L2 cache shared by cores 6 and 7
     system.addCache(3, 2048 * 1024, 64, {0, 1, 2, 3, 4, 5, 6, 7}); // L3 cache shared by all cores
-    */
-    
+
+    /*
     int cacheLevels, coreCount;
     int cacheLevel, cacheSize, blockSize, sharingCoreID;
 
@@ -40,6 +42,7 @@ int main() {
         }
         system.addCache(cacheLevel, cacheSize * 1024, blockSize, sharingIDs);
     }
+    */
 
     system.display();
 
