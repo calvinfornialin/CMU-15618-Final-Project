@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "compute_system.h"
+#include "task_runner.h"
 
 int main() {
 
@@ -45,6 +46,37 @@ int main() {
     */
 
     system.display();
+    vector<vector<set<int>>> simplifiedCacheHierarchy = system.getSimplifiedCacheHierarchy();
+
+
+    // Iterate over each level of the hierarchy
+    for (int level = 0; level < simplifiedCacheHierarchy.size(); ++level) {
+        cout << "Level " << level + 1 << ":" << endl;
+        
+        // Iterate over each set in the current level
+        for (const auto& cacheSet : simplifiedCacheHierarchy[level]) {
+            cout << "Set: { ";
+            
+            // Print the elements of the set
+            for (const auto& id : cacheSet) {
+                cout << id << " ";
+            }
+            
+            cout << "}" << endl;
+        }
+    }
+
+    int coreCount = system.getCoreCount();
+    int cacheCount = system.getCacheCount();
+    int numIters = 100;
+
+    cout << "coreCount: " << coreCount << endl;
+    cout << "cacheCount: " << cacheCount << endl;
+
+    SimpleTaskRunner simpletaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    simpletaskrunner.runTaskHybrid();
+    // simpletaskrunner.runTaskStatic();
+    // simpletaskrunner.runTaskDynamic();
 
     return 0;
 }

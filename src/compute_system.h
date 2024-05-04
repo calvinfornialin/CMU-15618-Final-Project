@@ -88,20 +88,34 @@ class ComputeSystem {
         // total number of cores
         int coreCount;
 
+        // total number of caches
+        int cacheCount;
+
         // number of cores sharing each cache level
         vector<int> coresSharingCache; 
 
         vector<Cache> cacheHierarchy;
 
+        // a simplified version for easier access of cahce hierarchy
+        vector<vector<set<int>>> simplifiedCacheHierarchy;
+
     public:
         // constructor
-        ComputeSystem(int l, int c) : cacheLevels(l), coreCount(c) {}
+        ComputeSystem(int l, int c) : cacheLevels(l), coreCount(c) {
+            simplifiedCacheHierarchy.resize(cacheLevels);
+            cacheCount = 0;
+        }
 
 
         // add a cache to the system
         void addCache(int level, int size, int blockSize, const vector<int>& sharingIDs) {
             Cache newCache(level, size, blockSize, sharingIDs);
             cacheHierarchy.push_back(newCache);
+            cacheCount += 1;
+            
+            // also update the simplifed cache hierarchy
+            set<int> sharingIDsSet(sharingIDs.begin(), sharingIDs.end());
+            simplifiedCacheHierarchy[level - 1].push_back(sharingIDsSet);
         }
 
 
@@ -161,6 +175,18 @@ class ComputeSystem {
                 cout << endl;
             }
             cout << endl;
+        }
+
+        vector<vector<set<int>>> getSimplifiedCacheHierarchy() const {
+            return simplifiedCacheHierarchy;
+        }
+
+        int getCacheCount() const {
+            return cacheCount;
+        }
+
+        int getCoreCount() const {
+            return coreCount;
         }
 };
  
