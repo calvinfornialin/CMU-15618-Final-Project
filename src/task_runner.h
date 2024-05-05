@@ -35,33 +35,45 @@ class SimpleTaskRunner {
             // start time measurement of running the task
             double start_time = omp_get_wtime();
 
+            int nteams_required = simplifiedCacheHierarchy[1].size();
+            int max_thrds = coreCount;
+            #pragma omp teams num_teams(nteams_required) thread_limit(max_thrds)
+            {
+                int tm_id = omp_get_team_num();
+                // Iterate through each set of each level for dynamic scheduling
+                int cur_iter = 1;
+                int set_number = 0;
+                for (const auto& cacheSet : simplifiedCacheHierarchy[1]) {
+                    // check if thread id is in the set
+                    if (tm_id == set_number) {
+                        #pragma omp parallel
+                        {
+                            // Static scheduling for each of the cores
+                            #pragma omp for schedule(static) nowait
+                            for (int i = iterations[0] * tm_id / nteams_required; i < iterations[0] * (tm_id + 1) / nteams_required; ++i) {
+                                std::cout << "Team " << tm_id << " is processing static iteration " << i << std::endl;
+                            }
+
+                            #pragma omp for schedule(dynamic) nowait
+                            for (int i = iterations[cur_iter - 1]; i < iterations[cur_iter]; ++i) {
+                                std::cout << "Team " << tm_id << " is processing dynamic iteration " << i << std::endl;
+                            }
+                        }
+                        break;
+                    } else {
+                        cur_iter += 1;
+                        set_number += 1;
+                    }
+                }
+            }
+
             #pragma omp parallel
             {
                 int thread_id = omp_get_thread_num();
 
-                // Static scheduling for each of the cores
-                #pragma omp for schedule(static) nowait
-                for (int i = 0; i < iterations[0]; ++i) {
-                    std::cout << "Thread " << thread_id << " is processing static iteration " << i << std::endl;
-                }
-
-                // Iterate through each set of each level for dynamic scheduling
-                int cur_iter = 1;
-                for (int level = 1; level < simplifiedCacheHierarchy.size(); ++level) {
-                    int tmp_cur_iter = cur_iter;
-                    for (const auto& cacheSet : simplifiedCacheHierarchy[level]) {
-                        // check if thread id is in the set
-                        if (cacheSet.find(thread_id) != cacheSet.end()) {
-                            #pragma omp for schedule(dynamic) nowait
-                            for (int i = iterations[tmp_cur_iter - 1]; i < iterations[tmp_cur_iter]; ++i) {
-                                std::cout << "Thread " << thread_id << " is processing dynamic iteration " << i << std::endl;
-                            }
-                            break;
-                        } else {
-                            tmp_cur_iter += 1;
-                        }
-                    }
-                    cur_iter += simplifiedCacheHierarchy[level].size();
+                #pragma omp for schedule(dynamic) nowait
+                for (int i = iterations[iterations.size() - 2]; i < iterations.back(); ++i) {
+                    std::cout << "Thread " << thread_id << " is processing dynamic iteration " << i << std::endl;
                 }
             }
 
@@ -209,40 +221,59 @@ class LINPACKTaskRunner {
                 vector<int> iterations;
 
                 for (int i = coreCount; i <= cacheCount ; i++) {
-                    iterations.push_back(n-k-1 * i / cacheCount);
+                    iterations.push_back((n-k-1) * i / cacheCount);
+                }
+
+                int nteams_required = simplifiedCacheHierarchy[1].size();
+                int max_thrds = coreCount;
+                #pragma omp teams num_teams(nteams_required) thread_limit(max_thrds) shared(a, k, kp1, lda, n, simplifiedCacheHierarchy, iterations)
+                {
+                    int tm_id = omp_get_team_num();
+                    // Iterate through each set of each level for dynamic scheduling
+                    int cur_iter = 1;
+                    int set_number = 0;
+                    float* y = a+kp1+kp1*lda;
+                    float* a_ptr = a+k+kp1*lda;
+                    float* x = a+kp1+k*lda;
+                    for (const auto& cacheSet : simplifiedCacheHierarchy[1]) {
+                        // check if thread id is in the set
+                        if (tm_id == set_number) {
+                            #pragma omp parallel
+                            {
+                                // Static scheduling for each of the cores
+                                #pragma omp for schedule(static) nowait
+                                for (int j = iterations[0] * tm_id / nteams_required; j < iterations[0] * (tm_id + 1) / nteams_required; ++j) {
+                                    for (int i = 0; i < n - k - 1; i++) {
+                                        y[i+j*n] += a_ptr[j*n] * x[i];
+                                    }
+                                }
+
+                                #pragma omp for schedule(dynamic) nowait
+                                for (int j = iterations[cur_iter - 1]; j < iterations[cur_iter]; ++j) {
+                                    for (int i = 0; i < n - k - 1; i++) {
+                                        y[i+j*n] += a_ptr[j*n] * x[i];
+                                    }
+                                }
+                            }
+                            break;
+                        } else {
+                            cur_iter += 1;
+                            set_number += 1;
+                        }
+                    }
                 }
 
                 #pragma omp parallel shared(a, k, kp1, lda, n, simplifiedCacheHierarchy, iterations)
                 {
-                    int thread_id = omp_get_thread_num();
+                    float* y = a+kp1+kp1*lda;
+                    float* a_ptr = a+k+kp1*lda;
+                    float* x = a+kp1+k*lda;
                     
-                    // Static scheduling for each of the cores
-                    #pragma omp for schedule(static) nowait
-                    for (int j = 0; j < iterations[0]; ++j) {
+                    #pragma omp for schedule(dynamic) nowait
+                    for (int j = iterations[iterations.size() - 2]; j < iterations.back(); ++j) {
                         for (int i = 0; i < n - k - 1; i++) {
-                            (a+kp1+kp1*lda)[i+j*n] += (a+k+kp1*lda)[j*n] * (a+kp1+k*lda)[i];
+                            y[i+j*n] += a_ptr[j*n] * x[i];
                         }
-                    }
-
-                    // Iterate through each set of each level for dynamic scheduling
-                    int cur_iter = 1;
-                    for (int level = 1; level < simplifiedCacheHierarchy.size(); ++level) {
-                        int tmp_cur_iter = cur_iter;
-                        for (const auto& cacheSet : simplifiedCacheHierarchy[level]) {
-                            // check if thread id is in the set
-                            if (cacheSet.find(thread_id) != cacheSet.end()) {
-                                #pragma omp for schedule(dynamic) nowait
-                                for (int j = iterations[tmp_cur_iter - 1]; j < iterations[tmp_cur_iter]; ++j) {
-                                    for (int i = 0; i < n - k - 1; i++) {
-                                        (a+kp1+kp1*lda)[i+j*n] += (a+k+kp1*lda)[j*n] * (a+kp1+k*lda)[i];
-                                    }
-                                }
-                                break;
-                            } else {
-                                tmp_cur_iter += 1;
-                            }
-                        }
-                        cur_iter += simplifiedCacheHierarchy[level].size();
                     }
                 }
             }
@@ -337,7 +368,7 @@ class LINPACKTaskRunner {
                 vector<int> iterations;
 
                 for (int i = coreCount; i <= cacheCount ; i++) {
-                    iterations.push_back(n-k-1 * i / cacheCount);
+                    iterations.push_back((n-k-1) * i / cacheCount);
                 }
 
                 #pragma omp parallel shared(a, k, kp1, lda, n, simplifiedCacheHierarchy, iterations)
@@ -445,7 +476,7 @@ class LINPACKTaskRunner {
                 vector<int> iterations;
 
                 for (int i = coreCount; i <= cacheCount ; i++) {
-                    iterations.push_back(n-k-1 * i / cacheCount);
+                    iterations.push_back((n-k-1) * i / cacheCount);
                 }
 
                 #pragma omp parallel shared(a, k, kp1, lda, n, simplifiedCacheHierarchy, iterations)
