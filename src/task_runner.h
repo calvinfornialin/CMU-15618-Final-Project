@@ -2,6 +2,7 @@
 #include <omp.h>
 #include <cmath>
 #include <iomanip>
+#include <atomic>
 
 class SimpleTaskRunner {
     private:
@@ -18,6 +19,8 @@ class SimpleTaskRunner {
 
         // keep track of the iteration cutoff points for static and dynamic tasks
         vector<int> iterations;
+
+        bool expected;
     
     public:
         SimpleTaskRunner(int numIters, int numCores, int numCaches, const vector<vector<set<int>>>& cacheHierarchy)
@@ -26,13 +29,21 @@ class SimpleTaskRunner {
             for (int i = numCores; i <= numCaches ; i++) {
                 iterations.push_back(iterCount * i / numCaches);
             }
+
+            expected = false;
         }
 
         double runTaskRefinedHybrid() {
             // Set number of workers using core count
             omp_set_num_threads(coreCount);
 
-            vector<bool> iteration_done(iterCount, false);
+            // vector<bool> iteration_done(iterCount, false);
+
+            vector<atomic<bool>> iteration_done(iterCount); 
+            // Initialize atomic flags to false
+            for (auto& flag : iteration_done) {
+                flag.store(false);
+            }
 
             // start time measurement of running the task
             double start_time = omp_get_wtime();
@@ -55,15 +66,7 @@ class SimpleTaskRunner {
                         // check if thread id is in the set
                         if (cacheSet.find(thread_id) != cacheSet.end()) {
                             for (int i = iterations[tmp_cur_iter - 1]; i < iterations[tmp_cur_iter]; ++i) {
-                                bool perform_task = false;
-                                #pragma omp critical
-                                {
-                                    if (!iteration_done[i]) {
-                                        iteration_done[i] = true;
-                                        perform_task = true;
-                                    }
-                                }
-                                if (perform_task) {
+                                if (!iteration_done[i].exchange(true)) {
                                     cout << "Thread " << thread_id << " is processing dynamic iteration " << i << endl;
                                 }
                             }
@@ -283,7 +286,11 @@ class LINPACKTaskRunner {
                     iterations.push_back((n-k-1) * i / cacheCount);
                 }
 
-                vector<bool> iteration_done(iterCount, false);
+                vector<atomic<bool>> iteration_done(iterations.back()); 
+                // Initialize atomic flags to false
+                for (auto& flag : iteration_done) {
+                    flag.store(false);
+                }
 
                 #pragma omp parallel shared(a, k, kp1, lda, n, simplifiedCacheHierarchy, iterations, iteration_done)
                 {
@@ -308,15 +315,7 @@ class LINPACKTaskRunner {
                             // check if thread id is in the set
                             if (cacheSet.find(thread_id) != cacheSet.end()) {
                                 for (int j = iterations[tmp_cur_iter - 1]; j < iterations[tmp_cur_iter]; ++j) {
-                                    bool perform_task = false;
-                                    #pragma omp critical
-                                    {
-                                        if (!iteration_done[j]) {
-                                            iteration_done[j] = true;
-                                            perform_task = true;
-                                        }
-                                    }
-                                    if (perform_task) {
+                                    if (!iteration_done[j].exchange(true)) {
                                         for (int i = 0; i < n - k - 1; i++) {
                                             y[i+j*n] += a_ptr[j*n] * x[i];
                                         }

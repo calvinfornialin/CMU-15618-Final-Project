@@ -81,28 +81,28 @@ int main() {
     // simpletaskrunner.runTaskDynamic();
 
 
-    // LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    // linpacktaskrunner.runTaskRefinedHybrid();
+    LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    linpacktaskrunner.runTaskRefinedHybrid();
     // linpacktaskrunner.runTaskHybrid();
     // linpacktaskrunner.runTaskStatic();
     // linpacktaskrunner.runTaskDynamic();
 
-    vector<double> execution_times;
+    // vector<double> execution_times;
 
-    // Run task 100 times
-    for (int i = 0; i < 100; ++i) {
-        LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-        double execution_time = linpacktaskrunner.runTaskRefinedHybrid();
-        // double execution_time = linpacktaskrunner.runTaskHybrid();
-        // double execution_time = linpacktaskrunner.runTaskStatic();
-        // double execution_time = linpacktaskrunner.runTaskDynamic();
-        execution_times.push_back(execution_time);
-    }
+    // // Run task 100 times
+    // for (int i = 0; i < 100; ++i) {
+    //     LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    //     double execution_time = linpacktaskrunner.runTaskRefinedHybrid();
+    //     // double execution_time = linpacktaskrunner.runTaskHybrid();
+    //     // double execution_time = linpacktaskrunner.runTaskStatic();
+    //     // double execution_time = linpacktaskrunner.runTaskDynamic();
+    //     execution_times.push_back(execution_time);
+    // }
 
-    // Calculate average execution time
-    double average_execution_time = accumulate(execution_times.begin(), execution_times.end(), 0.0) / execution_times.size();
+    // // Calculate average execution time
+    // double average_execution_time = accumulate(execution_times.begin(), execution_times.end(), 0.0) / execution_times.size();
 
-    cout << "Average execution time: " << average_execution_time << " seconds" << endl;
+    // cout << "Average execution time: " << average_execution_time << " seconds" << endl;
 
     return 0;
 }
