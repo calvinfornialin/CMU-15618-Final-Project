@@ -7,9 +7,27 @@
 int main() {
 
     // initialize the underlying hardware system including 
-    // cores number and cache topology
+    // cores number and cache topology for M1 Pro
     ComputeSystem system(3, 8);
+    system.addCache(1, 32 * 1024, 64, {0});     // core 0's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {1});     // core 1's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {2});     // core 2's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {3});     // core 3's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {4});     // core 4's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {5});     // core 5's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {6});     // core 6's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {7});     // core 7's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {8});     // core 8's private L1 cache 
+    system.addCache(1, 32 * 1024, 64, {9});     // core 9's private L1 cache 
+    system.addCache(2, 256 * 1024, 64, {0, 1, 2, 3}); // L2 cache shared by cores 0, 1, 2, 3
+    system.addCache(2, 256 * 1024, 64, {4, 5, 6, 7}); // L2 cache shared by cores 4, 5, 6, 7 
+    system.addCache(2, 256 * 1024, 64, {8, 9});       // L2 cache shared by cores 8 and 9
+    system.addCache(3, 2048 * 1024, 64, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}); // L3 cache shared by all cores
 
+    /*
+    // initialize the underlying hardware system including 
+    // cores number and cache topology for GHC
+    ComputeSystem system(3, 8);
     system.addCache(1, 32 * 1024, 64, {0});     // core 0's private L1 cache 
     system.addCache(1, 32 * 1024, 64, {1});     // core 1's private L1 cache 
     system.addCache(1, 32 * 1024, 64, {2});     // core 2's private L1 cache 
@@ -23,6 +41,36 @@ int main() {
     system.addCache(2, 256 * 1024, 64, {4, 5}); // L2 cache shared by cores 4 and 5
     system.addCache(2, 256 * 1024, 64, {6, 7}); // L2 cache shared by cores 6 and 7
     system.addCache(3, 2048 * 1024, 64, {0, 1, 2, 3, 4, 5, 6, 7}); // L3 cache shared by all cores
+    */
+
+    /*
+    // initialize the underlying hardware system including 
+    // cores number and cache topology for PSC
+    ComputeSystem system(4, 128);
+    // L1 cache
+    for (int i = 0; i < 128; ++i) {
+        system.addCache(1, 32 * 1024, 64, {i});  
+    }
+
+    // L2 cache
+    for (int i = 0; i < 128; ++i) {
+        system.addCache(2, 32 * 1024, 64, {i});  
+    }
+
+    // L3 cache
+    for (int i = 0; i < 128; i+=4) {
+        vector<int> sharingCoreIDs = {i, i+1, i+2, i+3};
+        system.addCache(3, 32 * 1024, 64, sharingCoreIDs);  
+    }
+
+    // L4 cache
+    vector<int> L4SharingCoreIDs;  
+    for (int i = 0; i < 128; ++i) {
+        L4SharingCoreIDs.push_back(i);
+    }
+    system.addCache(4, 32 * 1024, 64, L4SharingCoreIDs);
+    */
+    
 
     /*
     int cacheLevels, coreCount;
