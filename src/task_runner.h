@@ -1148,3 +1148,241 @@ class LINPACKTaskRunner {
             return temp;
         }
 };
+
+class PrimeCheckTaskRunner {
+    private:
+        // number of iterations the task should be run
+        int iterCount;
+
+        // number of cores used to run the task
+        int coreCount;
+
+        // number of caches in the system used to run the task
+        int cacheCount;
+
+        vector<vector<set<int>>> simplifiedCacheHierarchy;
+
+        // keep track of the iteration cutoff points for static and dynamic tasks
+        vector<int> iterations;
+
+        bool expected;
+
+        vector<bool> prime;
+    
+    public:
+        PrimeCheckTaskRunner(int numIters, int numCores, int numCaches, const vector<vector<set<int>>>& cacheHierarchy)
+            : iterCount(numIters), coreCount(numCores), cacheCount(numCaches), simplifiedCacheHierarchy(cacheHierarchy) {
+            
+            for (int i = numCores; i <= numCaches ; i++) {
+                iterations.push_back(iterCount * i / numCaches);
+            }
+
+            for (int i = 0; i <= iterations.back() ; i++) {
+                prime.push_back(true);
+            }
+        }
+
+        double runTaskRefinedHybrid() {
+            // Set number of workers using core count
+            omp_set_num_threads(coreCount);
+
+            // vector<bool> iteration_done(iterCount, false);
+
+            vector<atomic<bool>> iteration_done(iterCount); 
+            // Initialize atomic flags to false
+            for (auto& flag : iteration_done) {
+                flag.store(false);
+            }
+
+            // start time measurement of running the task
+            double start_time = omp_get_wtime();
+
+            #pragma omp parallel shared(iteration_done)
+            {
+                int thread_id = omp_get_thread_num();
+
+                // Static scheduling for each of the cores
+                #pragma omp for schedule(static) nowait
+                for (int i = 0; i < iterations[0]; ++i) {
+                    if (isPrime(i)) {
+                        prime[i] = true;
+                    } else {
+                        prime[i] = false;
+                    }
+                }
+
+                // Iterate through each set of each level for dynamic scheduling
+                int cur_iter = 1;
+                for (int level = 1; level < simplifiedCacheHierarchy.size(); ++level) {
+                    int tmp_cur_iter = cur_iter;
+                    for (const auto& cacheSet : simplifiedCacheHierarchy[level]) {
+                        // check if thread id is in the set
+                        if (cacheSet.find(thread_id) != cacheSet.end()) {
+                            for (int i = iterations[tmp_cur_iter - 1]; i < iterations[tmp_cur_iter]; ++i) {
+                                if (!iteration_done[i].exchange(true)) {
+                                    if (isPrime(i)) {
+                                        prime[i] = true;
+                                    } else {
+                                        prime[i] = false;
+                                    }
+                                }
+                            }
+                            break;
+                        } else {
+                            tmp_cur_iter += 1;
+                        }
+                    }
+                    cur_iter += simplifiedCacheHierarchy[level].size();
+                }
+            }
+
+            // end time measurement of running the task
+            double end_time = omp_get_wtime();
+            double total_time = end_time - start_time;
+
+            std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+            return total_time;
+        }
+
+        double runTaskHybrid() {
+            // Set number of workers using core count
+            omp_set_num_threads(coreCount);
+
+            // start time measurement of running the task
+            double start_time = omp_get_wtime();
+
+            int nteams_required = simplifiedCacheHierarchy[1].size();
+            int max_thrds = coreCount;
+            #pragma omp teams num_teams(nteams_required) thread_limit(max_thrds)
+            {
+                int tm_id = omp_get_team_num();
+                // Iterate through each set of each level for dynamic scheduling
+                int cur_iter = 1;
+                int set_number = 0;
+                for (const auto& cacheSet : simplifiedCacheHierarchy[1]) {
+                    // check if thread id is in the set
+                    if (tm_id == set_number) {
+                        #pragma omp parallel
+                        {
+                            // Static scheduling for each of the cores
+                            #pragma omp for schedule(static) nowait
+                            for (int i = iterations[0] * tm_id / nteams_required; i < iterations[0] * (tm_id + 1) / nteams_required; ++i) {
+                                if (isPrime(i)) {
+                                    prime[i] = true;
+                                } else {
+                                    prime[i] = false;
+                                }
+                            }
+
+                            #pragma omp for schedule(dynamic) nowait
+                            for (int i = iterations[cur_iter - 1]; i < iterations[cur_iter]; ++i) {
+                                if (isPrime(i)) {
+                                    prime[i] = true;
+                                } else {
+                                    prime[i] = false;
+                                }
+                            }
+                        }
+                        break;
+                    } else {
+                        cur_iter += 1;
+                        set_number += 1;
+                    }
+                }
+            }
+
+            #pragma omp parallel
+            {
+                int thread_id = omp_get_thread_num();
+
+                #pragma omp for schedule(dynamic) nowait
+                for (int i = iterations[iterations.size() - 2]; i < iterations.back(); ++i) {
+                    if (isPrime(i)) {
+                        prime[i] = true;
+                    } else {
+                        prime[i] = false;
+                    }
+                }
+            }
+
+            // end time measurement of running the task
+            double end_time = omp_get_wtime();
+            double total_time = end_time - start_time;
+
+            std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+            return total_time;
+        }
+
+        double runTaskStatic() {
+            // Set number of workers using core count
+            omp_set_num_threads(coreCount);
+
+            // start time measurement of running the task
+            double start_time = omp_get_wtime();
+
+            #pragma omp parallel
+            {
+                int thread_id = omp_get_thread_num();
+
+                // Static scheduling for all of the cores
+                #pragma omp for schedule(static) nowait
+                for (int i = 0; i < iterations.back(); ++i) {
+                    if (isPrime(i)) {
+                        prime[i] = true;
+                    } else {
+                        prime[i] = false;
+                    }
+                }
+            }
+
+            // end time measurement of running the task
+            double end_time = omp_get_wtime();
+            double total_time = end_time - start_time;
+
+            std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+            return total_time;
+        }
+
+        double runTaskDynamic() {
+            // Set number of workers using core count
+            omp_set_num_threads(coreCount);
+
+            // start time measurement of running the task
+            double start_time = omp_get_wtime();
+
+            #pragma omp parallel
+            {
+                int thread_id = omp_get_thread_num();
+
+                // Static scheduling for all of the cores
+                #pragma omp for schedule(dynamic) nowait
+                for (int i = 0; i < iterations.back(); ++i) {
+                    if (isPrime(i)) {
+                        prime[i] = true;
+                    } else {
+                        prime[i] = false;
+                    }
+                }
+            }
+
+            // end time measurement of running the task
+            double end_time = omp_get_wtime();
+            double total_time = end_time - start_time;
+
+            std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+            return total_time;
+        }
+
+        bool isPrime(int num) {
+            if (num <= 1) return false;
+            if (num <= 3) return true;
+
+            if (num % 2 == 0 || num % 3 == 0) return false;
+
+            for (int i = 5; i * i <= num; i = i + 6)
+                if (num % i == 0 || num % (i + 2) == 0)
+                    return false;
+
+            return true;
+        }
+};
