@@ -1167,7 +1167,7 @@ class PrimeCheckTaskRunner {
 
         bool expected;
 
-        vector<bool> prime;
+        vector<int> numPrime;
     
     public:
         PrimeCheckTaskRunner(int numIters, int numCores, int numCaches, const vector<vector<set<int>>>& cacheHierarchy)
@@ -1178,7 +1178,7 @@ class PrimeCheckTaskRunner {
             }
 
             for (int i = 0; i <= iterations.back() ; i++) {
-                prime.push_back(true);
+                numPrime.push_back(0);
             }
         }
 
@@ -1203,12 +1203,28 @@ class PrimeCheckTaskRunner {
 
                 // Static scheduling for each of the cores
                 #pragma omp for schedule(static) nowait
-                for (int i = 0; i < iterations[0]; ++i) {
-                    if (isPrime(i)) {
-                        prime[i] = true;
-                    } else {
-                        prime[i] = false;
+                for (int n = 0; n < iterations[0]; ++n) {
+                    int i;
+                    int j;
+                    int prime;
+                    int total = 0;
+
+                    for ( i = 2; i <= n; i++ )
+                    {
+                        prime = 1;
+
+                        for ( j = 2; j < i; j++ )
+                        {
+                        if ( i % j == 0 )
+                        {
+                            prime = 0;
+                            break;
+                        }
+                        }
+                        total = total + prime;
                     }
+
+                    numPrime[n] = total;
                 }
 
                 // Iterate through each set of each level for dynamic scheduling
@@ -1218,13 +1234,29 @@ class PrimeCheckTaskRunner {
                     for (const auto& cacheSet : simplifiedCacheHierarchy[level]) {
                         // check if thread id is in the set
                         if (cacheSet.find(thread_id) != cacheSet.end()) {
-                            for (int i = iterations[tmp_cur_iter - 1]; i < iterations[tmp_cur_iter]; ++i) {
-                                if (!iteration_done[i].exchange(true)) {
-                                    if (isPrime(i)) {
-                                        prime[i] = true;
-                                    } else {
-                                        prime[i] = false;
+                            for (int n = iterations[tmp_cur_iter - 1]; n < iterations[tmp_cur_iter]; ++n) {
+                                if (!iteration_done[n].exchange(true)) {
+                                    int i;
+                                    int j;
+                                    int prime;
+                                    int total = 0;
+
+                                    for ( i = 2; i <= n; i++ )
+                                    {
+                                        prime = 1;
+
+                                        for ( j = 2; j < i; j++ )
+                                        {
+                                        if ( i % j == 0 )
+                                        {
+                                            prime = 0;
+                                            break;
+                                        }
+                                        }
+                                        total = total + prime;
                                     }
+
+                                    numPrime[n] = total;
                                 }
                             }
                             break;
@@ -1266,21 +1298,53 @@ class PrimeCheckTaskRunner {
                         {
                             // Static scheduling for each of the cores
                             #pragma omp for schedule(static) nowait
-                            for (int i = iterations[0] * tm_id / nteams_required; i < iterations[0] * (tm_id + 1) / nteams_required; ++i) {
-                                if (isPrime(i)) {
-                                    prime[i] = true;
-                                } else {
-                                    prime[i] = false;
+                            for (int n = iterations[0] * tm_id / nteams_required; n < iterations[0] * (tm_id + 1) / nteams_required; ++n) {
+                                int i;
+                                int j;
+                                int prime;
+                                int total = 0;
+
+                                for ( i = 2; i <= n; i++ )
+                                {
+                                    prime = 1;
+
+                                    for ( j = 2; j < i; j++ )
+                                    {
+                                    if ( i % j == 0 )
+                                    {
+                                        prime = 0;
+                                        break;
+                                    }
+                                    }
+                                    total = total + prime;
                                 }
+
+                                numPrime[n] = total;
                             }
 
                             #pragma omp for schedule(dynamic) nowait
-                            for (int i = iterations[cur_iter - 1]; i < iterations[cur_iter]; ++i) {
-                                if (isPrime(i)) {
-                                    prime[i] = true;
-                                } else {
-                                    prime[i] = false;
+                            for (int n = iterations[cur_iter - 1]; n < iterations[cur_iter]; ++n) {
+                                int i;
+                                int j;
+                                int prime;
+                                int total = 0;
+
+                                for ( i = 2; i <= n; i++ )
+                                {
+                                    prime = 1;
+
+                                    for ( j = 2; j < i; j++ )
+                                    {
+                                    if ( i % j == 0 )
+                                    {
+                                        prime = 0;
+                                        break;
+                                    }
+                                    }
+                                    total = total + prime;
                                 }
+
+                                numPrime[n] = total;
                             }
                         }
                         break;
@@ -1296,12 +1360,28 @@ class PrimeCheckTaskRunner {
                 int thread_id = omp_get_thread_num();
 
                 #pragma omp for schedule(dynamic) nowait
-                for (int i = iterations[iterations.size() - 2]; i < iterations.back(); ++i) {
-                    if (isPrime(i)) {
-                        prime[i] = true;
-                    } else {
-                        prime[i] = false;
+                for (int n = iterations[iterations.size() - 2]; n < iterations.back(); ++n) {
+                    int i;
+                    int j;
+                    int prime;
+                    int total = 0;
+
+                    for ( i = 2; i <= n; i++ )
+                    {
+                        prime = 1;
+
+                        for ( j = 2; j < i; j++ )
+                        {
+                        if ( i % j == 0 )
+                        {
+                            prime = 0;
+                            break;
+                        }
+                        }
+                        total = total + prime;
                     }
+
+                    numPrime[n] = total;
                 }
             }
 
@@ -1326,12 +1406,28 @@ class PrimeCheckTaskRunner {
 
                 // Static scheduling for all of the cores
                 #pragma omp for schedule(static) nowait
-                for (int i = 0; i < iterations.back(); ++i) {
-                    if (isPrime(i)) {
-                        prime[i] = true;
-                    } else {
-                        prime[i] = false;
+                for (int n = 0; n < iterations.back(); ++n) {
+                    int i;
+                    int j;
+                    int prime;
+                    int total = 0;
+
+                    for ( i = 2; i <= n; i++ )
+                    {
+                        prime = 1;
+
+                        for ( j = 2; j < i; j++ )
+                        {
+                        if ( i % j == 0 )
+                        {
+                            prime = 0;
+                            break;
+                        }
+                        }
+                        total = total + prime;
                     }
+
+                    numPrime[n] = total;
                 }
             }
 
@@ -1356,12 +1452,28 @@ class PrimeCheckTaskRunner {
 
                 // Static scheduling for all of the cores
                 #pragma omp for schedule(dynamic) nowait
-                for (int i = 0; i < iterations.back(); ++i) {
-                    if (isPrime(i)) {
-                        prime[i] = true;
-                    } else {
-                        prime[i] = false;
+                for (int n = 0; n < iterations.back(); ++n) {
+                    int i;
+                    int j;
+                    int prime;
+                    int total = 0;
+
+                    for ( i = 2; i <= n; i++ )
+                    {
+                        prime = 1;
+
+                        for ( j = 2; j < i; j++ )
+                        {
+                        if ( i % j == 0 )
+                        {
+                            prime = 0;
+                            break;
+                        }
+                        }
+                        total = total + prime;
                     }
+
+                    numPrime[n] = total;
                 }
             }
 
@@ -1371,18 +1483,5 @@ class PrimeCheckTaskRunner {
 
             std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
             return total_time;
-        }
-
-        bool isPrime(int num) {
-            if (num <= 1) return false;
-            if (num <= 3) return true;
-
-            if (num % 2 == 0 || num % 3 == 0) return false;
-
-            for (int i = 5; i * i <= num; i = i + 6)
-                if (num % i == 0 || num % (i + 2) == 0)
-                    return false;
-
-            return true;
         }
 };

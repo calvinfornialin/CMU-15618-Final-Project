@@ -125,20 +125,20 @@ int main() {
     // simpletaskrunner.runTaskStatic();
     // simpletaskrunner.runTaskDynamic();
 
-    LINPACKTaskRunner linpacktaskrunner1(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    linpacktaskrunner1.runTaskRefinedHybrid();
-    LINPACKTaskRunner linpacktaskrunner2(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    linpacktaskrunner2.runTaskHybrid();
-    LINPACKTaskRunner linpacktaskrunner3(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    linpacktaskrunner3.runTaskStatic();
-    LINPACKTaskRunner linpacktaskrunner4(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    linpacktaskrunner4.runTaskDynamic();
+    // LINPACKTaskRunner linpacktaskrunner1(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // linpacktaskrunner1.runTaskRefinedHybrid();
+    // LINPACKTaskRunner linpacktaskrunner2(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // linpacktaskrunner2.runTaskHybrid();
+    // LINPACKTaskRunner linpacktaskrunner3(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // linpacktaskrunner3.runTaskStatic();
+    // LINPACKTaskRunner linpacktaskrunner4(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // linpacktaskrunner4.runTaskDynamic();
 
-    // PrimeCheckTaskRunner primechecktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    // primechecktaskrunner.runTaskRefinedHybrid();
-    // primechecktaskrunner.runTaskHybrid();
-    // primechecktaskrunner.runTaskStatic();
-    // primechecktaskrunner.runTaskDynamic();
+    PrimeCheckTaskRunner primechecktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    primechecktaskrunner.runTaskRefinedHybrid();
+    primechecktaskrunner.runTaskHybrid();
+    primechecktaskrunner.runTaskStatic();
+    primechecktaskrunner.runTaskDynamic();
 
     // vector<double> execution_times;
 
