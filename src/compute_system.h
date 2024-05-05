@@ -113,7 +113,7 @@ class ComputeSystem {
             cacheHierarchy.push_back(newCache);
             cacheCount += 1;
             
-            // also update the simplifed cache hierarchy
+            // also update the simplified cache hierarchy
             set<int> sharingIDsSet(sharingIDs.begin(), sharingIDs.end());
             simplifiedCacheHierarchy[level - 1].push_back(sharingIDsSet);
         }
