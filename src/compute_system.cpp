@@ -68,15 +68,18 @@ int main() {
 
     int coreCount = system.getCoreCount();
     int cacheCount = system.getCacheCount();
-    int numIters = 100;
+    int numIters = 1000;
 
     cout << "coreCount: " << coreCount << endl;
     cout << "cacheCount: " << cacheCount << endl;
 
-    SimpleTaskRunner simpletaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    simpletaskrunner.runTaskHybrid();
+    // SimpleTaskRunner simpletaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // simpletaskrunner.runTaskHybrid();
     // simpletaskrunner.runTaskStatic();
     // simpletaskrunner.runTaskDynamic();
+
+    LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    linpacktaskrunner.runTaskHybrid();
 
     return 0;
 }
