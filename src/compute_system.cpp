@@ -80,6 +80,8 @@ int main() {
 
     LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
     linpacktaskrunner.runTaskHybrid();
+    // linpacktaskrunner.runTaskStatic();
+    // linpacktaskrunner.runTaskDynamic();
 
     return 0;
 }
