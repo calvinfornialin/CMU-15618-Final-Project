@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <numeric>
 #include "compute_system.h"
 #include "task_runner.h"
 
@@ -68,20 +69,37 @@ int main() {
 
     int coreCount = system.getCoreCount();
     int cacheCount = system.getCacheCount();
-    int numIters = 10;
+    int numIters = 1000;
 
     cout << "coreCount: " << coreCount << endl;
     cout << "cacheCount: " << cacheCount << endl;
 
-    SimpleTaskRunner simpletaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    simpletaskrunner.runTaskHybrid();
+    // SimpleTaskRunner simpletaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // simpletaskrunner.runTaskHybrid();
     // simpletaskrunner.runTaskStatic();
     // simpletaskrunner.runTaskDynamic();
 
-    //LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    //linpacktaskrunner.runTaskHybrid();
+
+    // LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // linpacktaskrunner.runTaskHybrid();
     // linpacktaskrunner.runTaskStatic();
     // linpacktaskrunner.runTaskDynamic();
+
+    vector<double> execution_times;
+
+    // Run task 100 times
+    for (int i = 0; i < 100; ++i) {
+        LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+        double execution_time = linpacktaskrunner.runTaskHybrid();
+        // double execution_time = linpacktaskrunner.runTaskStatic();
+        // double execution_time = linpacktaskrunner.runTaskDynamic();
+        execution_times.push_back(execution_time);
+    }
+
+    // Calculate average execution time
+    double average_execution_time = accumulate(execution_times.begin(), execution_times.end(), 0.0) / execution_times.size();
+
+    cout << "Average execution time: " << average_execution_time << " seconds" << endl;
 
     return 0;
 }

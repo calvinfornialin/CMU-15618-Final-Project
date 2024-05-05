@@ -28,7 +28,7 @@ class SimpleTaskRunner {
             }
         }
 
-        void runTaskHybrid() {
+        double runTaskHybrid() {
             // Set number of workers using core count
             omp_set_num_threads(coreCount);
 
@@ -82,9 +82,10 @@ class SimpleTaskRunner {
             double total_time = end_time - start_time;
 
             std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+            return total_time;
         }
 
-        void runTaskStatic() {
+        double runTaskStatic() {
             // Set number of workers using core count
             omp_set_num_threads(coreCount);
 
@@ -107,9 +108,10 @@ class SimpleTaskRunner {
             double total_time = end_time - start_time;
 
             std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+            return total_time;
         }
 
-        void runTaskDynamic() {
+        double runTaskDynamic() {
             // Set number of workers using core count
             omp_set_num_threads(coreCount);
 
@@ -132,6 +134,7 @@ class SimpleTaskRunner {
             double total_time = end_time - start_time;
 
             std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+            return total_time;
         }
 };
 
@@ -174,7 +177,7 @@ class LINPACKTaskRunner {
             ipvt = new int[n];
         }
 
-        void runTaskHybrid() {
+        double runTaskHybrid() {
             // Set number of workers using core count
             omp_set_num_threads(coreCount);
 
@@ -268,7 +271,7 @@ class LINPACKTaskRunner {
                     float* y = a+kp1+kp1*lda;
                     float* a_ptr = a+k+kp1*lda;
                     float* x = a+kp1+k*lda;
-                    
+
                     #pragma omp for schedule(dynamic) nowait
                     for (int j = iterations[iterations.size() - 2]; j < iterations.back(); ++j) {
                         for (int i = 0; i < n - k - 1; i++) {
@@ -318,10 +321,10 @@ class LINPACKTaskRunner {
             delete [] ipvt;
             delete [] x;
 
-            return;
+            return total_time;
         }
 
-        void runTaskStatic() {
+        double runTaskStatic() {
             // Set number of workers using core count
             omp_set_num_threads(coreCount);
 
@@ -425,11 +428,11 @@ class LINPACKTaskRunner {
             delete [] ipvt;
             delete [] x;
 
-            return;
+            return total_time;
         }
 
 
-        void runTaskDynamic() {
+        double runTaskDynamic() {
             // Set number of workers using core count
             omp_set_num_threads(coreCount);
 
@@ -533,7 +536,7 @@ class LINPACKTaskRunner {
             delete [] ipvt;
             delete [] x;
 
-            return;
+            return total_time;
         }
 
         // MATGEN generates a "random" matrix for testing.
