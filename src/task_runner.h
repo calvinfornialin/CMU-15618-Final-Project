@@ -28,6 +28,62 @@ class SimpleTaskRunner {
             }
         }
 
+        double runTaskRefinedHybrid() {
+            // Set number of workers using core count
+            omp_set_num_threads(coreCount);
+
+            vector<bool> iteration_done(iterCount, false);
+
+            // start time measurement of running the task
+            double start_time = omp_get_wtime();
+
+            #pragma omp parallel shared(iteration_done)
+            {
+                int thread_id = omp_get_thread_num();
+
+                // Static scheduling for each of the cores
+                #pragma omp for schedule(static) nowait
+                for (int i = 0; i < iterations[0]; ++i) {
+                    std::cout << "Thread " << thread_id << " is processing static iteration " << i << std::endl;
+                }
+
+                // Iterate through each set of each level for dynamic scheduling
+                int cur_iter = 1;
+                for (int level = 1; level < simplifiedCacheHierarchy.size(); ++level) {
+                    int tmp_cur_iter = cur_iter;
+                    for (const auto& cacheSet : simplifiedCacheHierarchy[level]) {
+                        // check if thread id is in the set
+                        if (cacheSet.find(thread_id) != cacheSet.end()) {
+                            for (int i = iterations[tmp_cur_iter - 1]; i < iterations[tmp_cur_iter]; ++i) {
+                                bool perform_task = false;
+                                #pragma omp critical
+                                {
+                                    if (!iteration_done[i]) {
+                                        iteration_done[i] = true;
+                                        perform_task = true;
+                                    }
+                                }
+                                if (perform_task) {
+                                    cout << "Thread " << thread_id << " is processing dynamic iteration " << i << endl;
+                                }
+                            }
+                            break;
+                        } else {
+                            tmp_cur_iter += 1;
+                        }
+                    }
+                    cur_iter += simplifiedCacheHierarchy[level].size();
+                }
+            }
+
+            // end time measurement of running the task
+            double end_time = omp_get_wtime();
+            double total_time = end_time - start_time;
+
+            std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+            return total_time;
+        }
+
         double runTaskHybrid() {
             // Set number of workers using core count
             omp_set_num_threads(coreCount);
@@ -175,6 +231,148 @@ class LINPACKTaskRunner {
             matgen ( lda, n, a, x, b );
 
             ipvt = new int[n];
+        }
+
+        double runTaskRefinedHybrid() {
+            // Set number of workers using core count
+            omp_set_num_threads(coreCount);
+
+            // start time measurement of running the task
+            double start_time = omp_get_wtime();
+
+            int k,kp1,l,nm1;
+            float t;
+
+            info = 0;
+            nm1 = n - 1;
+            for ( k = 0; k < nm1; k++ )
+            {
+                kp1 = k + 1;
+                l = isamax ( n-k, a+k+k*lda, 1 ) + k - 1;
+                ipvt[k] = l + 1;
+
+                if ( a[l+k*lda] == 0.0 )
+                {
+                info = k + 1;
+                break;
+                }
+
+                if ( l != k )
+                {
+                t          = a[l+k*lda];
+                a[l+k*lda] = a[k+k*lda];
+                a[k+k*lda] = t;
+                }
+                t = -1.0 / a[k+k*lda]; 
+                sscal ( n-k-1, t, a+kp1+k*lda, 1 );
+            //
+            //  Interchange the pivot row and the K-th row.
+            //
+                if ( l != k )
+                {
+                sswap ( n-k-1, a+l+kp1*lda, lda, a+k+kp1*lda, lda );
+                }
+            //
+            //  Add multiples of the K-th row to rows K+1 through N.
+            //
+                int i,j;
+                // keep track of the iteration cutoff points for static and dynamic tasks
+                vector<int> iterations;
+
+                for (int i = coreCount; i <= cacheCount ; i++) {
+                    iterations.push_back((n-k-1) * i / cacheCount);
+                }
+
+                vector<bool> iteration_done(iterCount, false);
+
+                #pragma omp parallel shared(a, k, kp1, lda, n, simplifiedCacheHierarchy, iterations, iteration_done)
+                {
+                    int thread_id = omp_get_thread_num();
+                    float* y = a+kp1+kp1*lda;
+                    float* a_ptr = a+k+kp1*lda;
+                    float* x = a+kp1+k*lda;
+
+                    // Static scheduling for each of the cores
+                    #pragma omp for schedule(static) nowait
+                    for (int j = 0; j < iterations[0]; ++j) {
+                        for (int i = 0; i < n - k - 1; i++) {
+                            y[i+j*n] += a_ptr[j*n] * x[i];
+                        }
+                    }
+
+                    // Iterate through each set of each level for dynamic scheduling
+                    int cur_iter = 1;
+                    for (int level = 1; level < simplifiedCacheHierarchy.size(); ++level) {
+                        int tmp_cur_iter = cur_iter;
+                        for (const auto& cacheSet : simplifiedCacheHierarchy[level]) {
+                            // check if thread id is in the set
+                            if (cacheSet.find(thread_id) != cacheSet.end()) {
+                                for (int j = iterations[tmp_cur_iter - 1]; j < iterations[tmp_cur_iter]; ++j) {
+                                    bool perform_task = false;
+                                    #pragma omp critical
+                                    {
+                                        if (!iteration_done[j]) {
+                                            iteration_done[j] = true;
+                                            perform_task = true;
+                                        }
+                                    }
+                                    if (perform_task) {
+                                        for (int i = 0; i < n - k - 1; i++) {
+                                            y[i+j*n] += a_ptr[j*n] * x[i];
+                                        }
+                                    }
+                                }
+                                break;
+                            } else {
+                                tmp_cur_iter += 1;
+                            }
+                        }
+                        cur_iter += simplifiedCacheHierarchy[level].size();
+                    }
+                }
+            }
+
+            ipvt[n-1] = n;
+
+            if ( a[n-1+(n-1)*lda] == 0.0 )
+            {
+                info = n;
+            }
+
+            // end time measurement of running the task
+            double end_time = omp_get_wtime();
+            double total_time = end_time - start_time;
+
+            std::cout << "Total execution time: " << total_time << " seconds" << std::endl;
+
+            if ( info != 0 )
+            {
+                cout << "\n";
+                cout << "TEST02 - Fatal error!\n";
+                cout << "  MSGEFA reports the matrix is singular.\n";
+                exit ( 1 );
+            }
+            //
+            //  Solve the linear system.
+            //
+            job = 0;
+            sgesl ( a, lda, n, ipvt, b, job );
+
+            err = 0.0;
+            for ( int i = 0; i < n; i++ )
+            {
+                err = err + fabs ( x[i] - b[i] );
+            }
+
+            cout << "N: " << n << endl;
+            cout << "Error: " << err << endl;
+
+            delete [] a;
+            delete [] b;
+            delete [] ipvt;
+            delete [] x;
+
+            return total_time;
         }
 
         double runTaskHybrid() {

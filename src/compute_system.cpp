@@ -75,12 +75,14 @@ int main() {
     cout << "cacheCount: " << cacheCount << endl;
 
     // SimpleTaskRunner simpletaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // simpletaskrunner.runTaskRefinedHybrid();
     // simpletaskrunner.runTaskHybrid();
     // simpletaskrunner.runTaskStatic();
     // simpletaskrunner.runTaskDynamic();
 
 
     // LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // linpacktaskrunner.runTaskRefinedHybrid();
     // linpacktaskrunner.runTaskHybrid();
     // linpacktaskrunner.runTaskStatic();
     // linpacktaskrunner.runTaskDynamic();
@@ -90,7 +92,8 @@ int main() {
     // Run task 100 times
     for (int i = 0; i < 100; ++i) {
         LINPACKTaskRunner linpacktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-        double execution_time = linpacktaskrunner.runTaskHybrid();
+        double execution_time = linpacktaskrunner.runTaskRefinedHybrid();
+        // double execution_time = linpacktaskrunner.runTaskHybrid();
         // double execution_time = linpacktaskrunner.runTaskStatic();
         // double execution_time = linpacktaskrunner.runTaskDynamic();
         execution_times.push_back(execution_time);
