@@ -2,7 +2,8 @@
 ## Design and Implementation of a Cache Hierarchy-Aware Task Scheduling on Multicore Architectures
 ## URL
 [Final project proposal](<https://github.com/calvinfornialin/CMU-15618-Final-Project/blob/main/final_project_proposal.pdf>)   
-[Final project milestone](<https://github.com/calvinfornialin/CMU-15618-Final-Project/blob/main/final_project_milestone.pdf>)
+[Final project milestone](<https://github.com/calvinfornialin/CMU-15618-Final-Project/blob/main/final_project_milestone.pdf>)  
+[Final project report](<https://github.com/calvinfornialin/CMU-15618-Final-Project/blob/main/final_project_report.pdf>)
 
 ## Summary
 
@@ -70,17 +71,17 @@ Since we are taking the cache-hierarchy factor into account, which means the sch
 ## Schedule
 | Week Number | Checkpoint | Status |
 |----------|----------|----------|
-| 1 | Study OpenMP’s open scheduler source code | N/A |
-| 2 | Design and revise the algorithm of cache hierarchy-aware scheduler. | N/A |
-| 3 | Implementation of the scheduler. | N/A |
-| 4 | Perform analysis and gather data among several schedulers. | N/A |
-| 5 | Work on report and extending scheduler to be dynamically adjustable. | N/A |
+| 1 | ~~Study OpenMP’s open scheduler source code~~ | DONE |
+| 2 | Design and revise the algorithm of cache hierarchy-aware scheduler. | DONE |
+| 3 | Implementation of the scheduler. | DONE |
+| 4 | Perform analysis and gather data among several schedulers. | DONE |
+| 5 | Work on report and extending scheduler to be dynamically adjustable. | DONE |
 
 ## Updated Schedule for Project Milestone
 | Week Number | Checkpoint | Person in charge | Status |
 |----------|----------|----------|----------|
-| 0 - 0.5 | Build the initial version of the proposed scheduler. | Yen-Shuo | N/A |
-| 0.5 -1 | Debug and customize the scheduler to make it easier to conduct experiments related to sensitivity analysis. | Calvin | N/A |
-| 1 - 1.5 | Use the scheduler and test its performance on one of the tasks used for performance comparison between different types of schedulers. | Yen-Shuo | N/A |
-| 1.5 -2 | Measure the performance gains of the proposed schedulers against OpenMP implemented scheduler types using various tasks. Make adjustments if needed. | Calvin | N/A |
-| 2 - 2.5 | Buffer time to conduct any extra experiments needed. If everything goes well, look into the tasks listed in “nice to haves.” | Calvin, Yen-Shuo | N/A |
+| 0 - 0.5 | Build the initial version of the proposed scheduler. | Yen-Shuo | DONE |
+| 0.5 -1 | Debug and customize the scheduler to make it easier to conduct experiments related to sensitivity analysis. | Calvin | DONE |
+| 1 - 1.5 | Use the scheduler and test its performance on LINPACK used for performance comparison between different types of schedulers. | Yen-Shuo | DONE |
+| 1.5 -2 | Measure the performance gains of the proposed schedulers against OpenMP implemented scheduler types using PrimeCheck and RandomWorkload. Make adjustments if needed. | Calvin | DONE |
+| 2 - 2.5 | Buffer time to conduct any extra experiments needed. If everything goes well, look into the tasks listed in “nice to haves.” | Calvin, Yen-Shuo | DONE |
