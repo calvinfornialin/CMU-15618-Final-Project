@@ -134,11 +134,18 @@ int main() {
     // LINPACKTaskRunner linpacktaskrunner4(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
     // linpacktaskrunner4.runTaskDynamic();
 
-    PrimeCheckTaskRunner primechecktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
-    primechecktaskrunner.runTaskRefinedHybrid();
-    primechecktaskrunner.runTaskHybrid();
-    primechecktaskrunner.runTaskStatic();
-    primechecktaskrunner.runTaskDynamic();
+    // PrimeCheckTaskRunner primechecktaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    // primechecktaskrunner.runTaskRefinedHybrid();
+    // primechecktaskrunner.runTaskHybrid();
+    // primechecktaskrunner.runTaskStatic();
+    // primechecktaskrunner.runTaskDynamic();
+
+    RandomWorkloadTaskRunner randomworkloadtaskrunner(numIters, coreCount, cacheCount, simplifiedCacheHierarchy);
+    randomworkloadtaskrunner.runTaskRefinedHybrid();
+    randomworkloadtaskrunner.runTaskHybrid();
+    randomworkloadtaskrunner.runTaskStatic();
+    randomworkloadtaskrunner.runTaskDynamic();
+
 
     // vector<double> execution_times;
 
