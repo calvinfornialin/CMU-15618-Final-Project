@@ -71,7 +71,7 @@ Since we are taking the cache-hierarchy factor into account, which means the sch
 ## Schedule
 | Week Number | Checkpoint | Status |
 |----------|----------|----------|
-| 1 | ~~Study OpenMP’s open scheduler source code~~ | DONE |
+| 1 | ~~Study OpenMP’s open scheduler source code~~ | ~~DONE~~ |
 | 2 | Design and revise the algorithm of cache hierarchy-aware scheduler. | DONE |
 | 3 | Implementation of the scheduler. | DONE |
 | 4 | Perform analysis and gather data among several schedulers. | DONE |
